@@ -5,7 +5,7 @@
 _Arthur_ = 'Timbaland'
 
 import pysphere,pymysql
-from gi import VIServer
+from pysphere import VIServer
 import logging
 import ssl
 import datetime,os,time
@@ -75,8 +75,9 @@ class VcentTools(object):
             try:
                 vm.reset()
                 for i in range(1,30):
-                    print unicode('虚拟机%s 正在重置中。。。。，请等待注册\n'.format( vm_name.encode('utf-8')),'utf-8')
+                    print u'虚拟机%s 正在重置中。。。。，请等待注册\n'%(vm_name)
                     time.sleep(1)
+                print u'重置完成'
                 server_obj.disconnect()
 
                 return
@@ -84,9 +85,10 @@ class VcentTools(object):
                 print e
 
 
+
         if vm.is_powered_off()  == True:
             vm.power_on()
-            print unicode('虚拟机%s 正在开机中。。。。' % (vm_name), 'utf-8')
+            print u'虚拟机%s 正在开机中。。。。' % (vm_name)
             server_obj.disconnect()
             return 0
 
@@ -154,8 +156,12 @@ if __name__ == '__main__':
     settime = []
     with open(path,'r') as  f:
          settime = f.readlines()
-    # print settime[1]
+    t = settime[1].split('=')[1].split(',')
+    m = []
+    for i in t:
+         m.append(i.strip())
 
+    # print m
 
     while True:
 
@@ -165,23 +171,21 @@ if __name__ == '__main__':
         #         logger.info('正在重置%s' %(vmname))
         #         time.sleep(10)
         nowdate = datetime.datetime.now().strftime
-        logger.info(u'现在时间%s,还未到才重置时间%s 请等待重置' %(now_date,settime[1].split('=')[1]))
+        logger.info(u'现在时间%s,还未到才重置时间%s 请等待重置' %(now_date,settime[1].split('=')[1].lstrip()))
         #检查是否有关机的虚拟机
         for  vmname in p.get_vmname(query_vm):
             # t = datetime.datetime.now().strftime('%H:%M')
-            # print t
-            # print settime[1].split('=')[1].lstrip()
 
-            if datetime.datetime.now().strftime('%H:%M') == settime[1].split('=')[1].lstrip():
+            if datetime.datetime.now().strftime('%H:%M') in m:
                 for vmname in p.get_vmname(query_vm):
                     obj.vmaction(vmname)
                     logger.info(u'正在重置%s' % (vmname))
-                    time.sleep(10)
+                    # time.sleep(10)
             if obj.vm_status(vmname) == 0:
                 obj.vmaction(vmname)
                 logger.info(u'%s正在开机。。。。' %(vmname))
             else:
                 logger.info(u'虚拟机%s正在运行,未到重置时间：%s'%(vmname,unicode(settime[1].split('=')[1].lstrip())))
 
-            time.sleep(3)
+        # time.sleep(1)
 
